@@ -1,3 +1,5 @@
+const url = require('url');
+const config = require('../../../config.json');
 const Commando = require('discord.js-commando');
 const RichEmbed = require('discord.js').RichEmbed;
 const Sequelize = require('sequelize');
@@ -61,15 +63,17 @@ class Lookup extends Commando.Command {
         const data = rawData;
 
 
-        const kdr = parseFloat(data.kills / (parseInt(data.deaths) + 1)).toFixed(2);
-        const accuracy = parseFloat(data.hits / (parseInt(data.shots) + 1)).toFixed(2);
-        const headShotPercentage = parseFloat(data.headshots / (parseInt(data.kills) + 1)).toFixed(2);
+        const adr = data.adr;
+        const kdr = data.kdr;
+        const accuracy = data.accuracy;
+        const headShotPercentage = data.hs_percent;
 
         let columnOne = new String();
         let columnTwo = new String();
 
         let resultEmbed = new RichEmbed({
             title: `Stats for ${data.name}`,
+            description: `View the full profile on ${url.resolve(config.webserver.baseurl, '/player/' + data.id)}`
         });
 
         let counter = 0;
@@ -86,9 +90,9 @@ class Lookup extends Commando.Command {
         resultEmbed.addField('----------', columnTwo, true);
         resultEmbed.addBlankField();
 
-        resultEmbed.addField('KDR', kdr, true);
-        resultEmbed.addField('Accuracy', accuracy + '%', true);
-        resultEmbed.addField('Headshot %', headShotPercentage + '%', true);
+        resultEmbed.addField('ADR', adr, true);
+        resultEmbed.addField('Accuracy', accuracy, true);
+        resultEmbed.addField('Headshot', headShotPercentage, true);
 
         const dateEnded = Date.now();
         resultEmbed.setFooter(`Took ${dateEnded - dateStarted} ms to get this data!`);
@@ -105,8 +109,7 @@ async function findDataFromId(client, id) {
     const foundData = await global.models.Player.findAll({
         where: {
             steam: id
-        },
-        raw: true
+        }
     });
     return foundData[0];
 }

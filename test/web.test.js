@@ -54,6 +54,9 @@ describe('Web API', function () {
                     const data = JSON.parse(response.text);
                     expect(data).to.be.an('array');
                     expect(data[0]).to.haveOwnProperty('id');
+                    expect(data[0]).to.haveOwnProperty('adr');
+                    expect(data[0]).to.haveOwnProperty('hs_percent');
+                    expect(data[0]).to.haveOwnProperty('kdr');
                     expect(data[0]).to.haveOwnProperty('name');
                     expect(data[0]).to.haveOwnProperty('score');
                     expect(data[0]).to.haveOwnProperty('kills');

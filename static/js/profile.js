@@ -19,7 +19,7 @@ $(document).ready(async () => {
     // GET the profile data
     const response = await getPlayerProfile();
     let historicalData = await getHistoricalData(response.steam);
-    drawHistoricalChart('score', historicalData.map(d => d.score), historicalData.map(d => d.createdAt));
+    drawHistoricalChart('adr', historicalData.map(d => d.adr), historicalData.map(d => d.createdAt));
     // Initialize weapon kills data table
     const weaponKillsTable = $("#weapon-kills").DataTable({
         order: [
@@ -27,8 +27,6 @@ $(document).ready(async () => {
         ],
         columns: [{
             render: function (data, type, row, meta) {
-                let kdr = row.kills / (parseInt(row.deaths) + 1);
-                kdr = kdr.toFixed(2)
                 return `<img src="/static/img/weapons/${row.name}.png" class="img-thumbnail" alt="${row.name}">`
             }
         }, {
@@ -143,21 +141,13 @@ $(document).ready(async () => {
 
 
     $("#name").text(response.name);
-
-    let kdr = response.kills / (parseInt(response.deaths) + 1);
-    kdr = kdr.toFixed(2)
-
-    let hs = (response.headshots / (parseInt(response.kills) + 1) * 100);
-    hs = hs.toFixed(0);
-
-    let accuracy = (response.hits / (parseInt(response.shots) + 1) * 100);
-    accuracy = accuracy.toFixed(0);
-
-    $("#kdr").text(kdr);
-    $("#hs-percent").text(hs + " %");
-    $("#accuracy").text(accuracy + " %");
+    $("#kdr").text(response.kdr);
+    $("#hs_percent").text(response.hs_percent);
+    $("#adr").text(response.adr);
+    $("#accuracy").text(response.accuracy);
     $("#time-played").text(secondsToHuman(response.connected))
 
+    $("#steam").html(`<a href="https://steamid.io/lookup/${response.steam}">${response.steam}</a>`);
     $("#kills").text(response.kills);
     $("#deaths").text(response.deaths);
     $("#assists").text(response.assists);
@@ -168,10 +158,10 @@ $(document).ready(async () => {
     $("#shots").text(response.shots);
     $("#hits").text(response.hits);
     $("#damage").text(response.damage)
-    $("#hits-per-kill").text(parseFloat(response.hits / response.kills).toFixed(2));
-    $("#damage-per-hit").text(parseFloat(response.damage / response.hits).toFixed(2));
+    $("#hits-per-kill").text((response.hits / response.kills).toFixed(2));
+    $("#damage-per-hit").text((response.damage / response.hits).toFixed(2));
 
-    let lastConnectedDate = new Date(parseInt(response.lastconnect) * 1000);
+    let lastConnectedDate = new Date(response.lastconnect * 1000);
     $("#last-connected").text(`${lastConnectedDate.toLocaleDateString()} ${lastConnectedDate.toLocaleTimeString()}`)
 
     for (const weapon of weapons) {
@@ -186,7 +176,7 @@ $(document).ready(async () => {
     sideWinsChart.data.datasets[0].data.push(response.ct_win);
     sideWinsChart.update();
 
-    hitsChart.data.datasets[0].data = [response.head, response.stomach, response.chest, parseInt(response.left_arm) + parseInt(response.right_arm), parseInt(response.left_leg) + parseInt(response.right_leg)];
+    hitsChart.data.datasets[0].data = [response.head, response.stomach, response.chest, response.left_arm + response.right_arm, response.left_leg + response.right_leg];
     hitsChart.update();
 
     c4Chart.data.datasets[0].data = [response.c4_planted, response.c4_exploded, response.c4_defused];
@@ -201,32 +191,11 @@ $(document).ready(async () => {
     });
 })
 
-function getIdFromUrl() {
-    const splitPageUrl = window.location.pathname.split('/');
-    return splitPageUrl[splitPageUrl.length - 1];
-}
 
 function transparentize(color, opacity) {
     var alpha = opacity === undefined ? 0.5 : 1 - opacity;
     return Color(color).alpha(alpha).rgbString();
 }
-
-function getPlayerProfile() {
-    return new Promise((resolve, reject) => {
-        // GET the profile data
-        $.ajax({
-            type: "GET",
-            url: "/api/player/" + getIdFromUrl(),
-            success: function (response) {
-                resolve(response);
-            },
-            error: function (xhr, status, error) {
-                reject(error);
-            }
-        });
-    });
-}
-
 
 function drawHistoricalChart(dataTitle, data, dataLabels) {
     var config = {

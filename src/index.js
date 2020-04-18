@@ -11,7 +11,7 @@ const HistoricalDataClass = require('./classes/historicalData');
 
 global.config = config;
 // Relevant data fields, used to enumerate
-global.dataFields = ['score', 'kills', 'deaths', 'assists', 'suicides', 'tk', 'shots', 'hits', 'headshots', 'rounds_tr', 'rounds_ct', 'knife', 'glock', 'hkp2000', `usp_silencer`, `p250`, `deagle`, `elite`, `fiveseven`, `tec9`, `cz75a`, `revolver`, `nova`, `xm1014`, `mag7`, `sawedoff`, `bizon`, `mac10`, `mp9`, `mp7`, `ump45`, `p90`, `galilar`, `ak47`, `scar20`, `famas`, `m4a1`, `m4a1_silencer`, `aug`, `ssg08`, `sg556`, `awp`, `g3sg1`, `m249`, `negev`, `hegrenade`, `flashbang`, `smokegrenade`, `inferno`, `decoy`, `taser`, `mp5sd`, `head`, `chest`, `stomach`, `left_arm`, `right_arm`, `left_leg`, `right_leg`, `c4_planted`, `c4_exploded`, `c4_defused`, `ct_win`, `tr_win`, `hostages_rescued`, `vip_killed`, `vip_escaped`, `vip_played`, `mvp`, `damage`, `match_win`, `match_draw`, `match_lose`]
+global.dataFields = ['adr', 'hs_percent', 'kdr', 'score', 'kills', 'deaths', 'assists', 'suicides', 'tk', 'shots', 'hits', 'headshots', 'rounds_tr', 'rounds_ct', 'knife', 'glock', 'hkp2000', `usp_silencer`, `p250`, `deagle`, `elite`, `fiveseven`, `tec9`, `cz75a`, `revolver`, `nova`, `xm1014`, `mag7`, `sawedoff`, `bizon`, `mac10`, `mp9`, `mp7`, `ump45`, `p90`, `galilar`, `ak47`, `scar20`, `famas`, `m4a1`, `m4a1_silencer`, `aug`, `ssg08`, `sg556`, `awp`, `g3sg1`, `m249`, `negev`, `hegrenade`, `flashbang`, `smokegrenade`, `inferno`, `decoy`, `taser`, `mp5sd`, `head`, `chest`, `stomach`, `left_arm`, `right_arm`, `left_leg`, `right_leg`, `c4_planted`, `c4_exploded`, `c4_defused`, `ct_win`, `tr_win`, `hostages_rescued`, `vip_killed`, `vip_escaped`, `vip_played`, `mvp`, `damage`, `match_win`, `match_draw`, `match_lose`].sort()
 
 /*
   _      ____   _____  _____ _____ _   _  _____ 
@@ -89,6 +89,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
     host: process.env.MYSQL_HOST,
     dialect: 'mysql',
+    dialectOptions: { decimalNumbers: true },
 
     pool: {
         max: 5,
@@ -135,12 +136,12 @@ global.sequelize = sequelize;
 
 if (cluster.isMaster) {
 
-    // Count the machine's CPUs
-    const cpuCount = require('os').cpus().length;
-    logger.info(`Detected ${cpuCount} available CPUs, scaling webserver to ${cpuCount} processes`)
 
     // Create a worker for each CPU
     if (process.env.NODE_ENV !== 'test') {
+        // Count the machine's CPUs
+        const cpuCount = require('os').cpus().length;
+        logger.info(`Detected ${cpuCount} available CPUs, scaling webserver to ${cpuCount} processes`)
         for (var i = 0; i < cpuCount; i += 1) {
             cluster.fork();
         }

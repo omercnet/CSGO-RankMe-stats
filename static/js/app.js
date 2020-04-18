@@ -12,17 +12,13 @@ window.colours = [
 ]
 
 
-function getHistoricalData(steam, startDate, endDate) {
+function api(method, endpoint, data) {
     return new Promise((resolve, reject) => {
         // GET the profile data
         $.ajax({
-            type: "GET",
-            url: "/api/historicalData/",
-            data: {
-                steam,
-                startDate,
-                endDate
-            },
+            type: method,
+            url: "/api/" + endpoint,
+            data: data,
             success: function (response) {
                 resolve(response);
             },
@@ -32,6 +28,14 @@ function getHistoricalData(steam, startDate, endDate) {
         });
     });
 }
+
+const getPlayers = () => api("GET", "overview")
+
+const getIdFromUrl = () => window.location.href.substring(window.location.href.lastIndexOf('/') + 1)
+
+const getPlayerProfile = () => api("GET", "player/" + getIdFromUrl())
+
+const getHistoricalData = (steam, startDate, endDate) => api("GET", "historicalData", {steam, startDate, endDate})
 
 function drawDataTable(data, table) {
     table.clear();

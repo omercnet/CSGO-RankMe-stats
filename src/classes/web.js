@@ -93,7 +93,7 @@ class Web {
      */
     async ApiOverviewRoute(req, res) {
         const data = await global.models.Player.findAll({
-            attributes: ['id', 'name', 'score', 'kills', 'deaths', 'headshots', 'steam'],
+            attributes: ['id', 'name', 'score', 'kills', 'deaths', 'headshots', 'steam', 'adr', 'hs_percent', 'kdr'],
             limit: 1000,
             order: [
                 ['score', 'DESC']
@@ -153,15 +153,14 @@ class Web {
             }
         }
 
-        if (req.query.steam !== undefined) {
+        if (req.query.steam) {
             whereObj[Op.and].steam = req.query.steam
         }
 
         const startDate = new Date(req.query.startDate);
         const endDate = new Date(req.query.endDate);
         const data = await global.models.HistoricalData.findAll({
-            where: whereObj,
-            raw: true,
+            where: whereObj
         });
 
         res.json(data);

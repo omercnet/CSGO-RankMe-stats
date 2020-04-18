@@ -15,7 +15,7 @@
     <div class="container-fluid">
         <% if(global.config.historicalData.enabled) { %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="card text-center">
                     <div id="score-inc" class="card-body">
                         <div class="card-header">
@@ -30,7 +30,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="card text-center">
                     <div id="kills-inc" class="card-body">
                         <div class="card-header">
@@ -39,6 +39,21 @@
                         <p class="card-text">
 
                             <canvas id="kills-increase-chart"></canvas>
+
+                        </p>
+                        <ol class="two-columns"></ol>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card text-center">
+                    <div id="adr-inc" class="card-body">
+                        <div class="card-header">
+                            <h2>ADR</h2>
+                        </div>
+                        <p class="card-text">
+
+                            <canvas id="adr-increase-chart"></canvas>
 
                         </p>
                         <ol class="two-columns"></ol>
@@ -62,8 +77,9 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Score</th>
-                                <th>Kill/death ratio</th>
-                                <th>Headshot %</th>
+                                <th>ADR</th>
+                                <th>KDR</th>
+                                <th>Headshot</th>
                                 <th>Kills</th>
                                 <th>Deaths</th>
                             </tr>
@@ -76,10 +92,6 @@
                 </p>
             </div>
         </div>
-
-
-
-
     </div>
 </body>
 

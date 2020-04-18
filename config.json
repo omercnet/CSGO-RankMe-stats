@@ -5,13 +5,14 @@
     "discordBot": {
         "enabled": true,
         "prefix": "!",
-        "owner": "220554523561820160",
+        "owner": "668864782836826163",
         "minimumKillsBeforeStatsCalc": "20",
         "stats_showMedals": false
     },
     "webserver": {
         "enabled": true,
-        "port": 8080
+        "port": 8080,
+        "baseurl": "https://rankme.teamplay.co.il"
     },
     "historicalData": {
         "enabled": true,

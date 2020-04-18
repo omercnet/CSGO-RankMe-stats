@@ -24,6 +24,7 @@ class Stats extends Commando.Command {
             .setTimestamp()
 
         let topScorePlayer = await this.client.Player.findAll({
+            attributes: ['name', 'score'],
             limit: 3,
             order: [
                 ['score', 'DESC']
@@ -35,15 +36,24 @@ class Stats extends Commando.Command {
             }
         });
 
-        let topKDAPlayer = await this.client.Player.findAll({
-            attributes: {
-                include: [
-                    [this.client.sequelize.literal("`kills` / (`deaths` + 1)"), "kda"]
-                ]
-            },
+        let topKDRPlayer = await this.client.Player.findAll({
+            attributes: ['name', [this.client.sequelize.literal("round(`kills` / `deaths`,2)"), "kdr"]],
             limit: 3,
             order: [
-                [this.client.sequelize.literal("`kills` / (`deaths` + 1)"), 'DESC']
+                [this.client.sequelize.literal('kdr'), 'DESC']
+            ],
+            where: {
+                kills: {
+                    [Sequelize.Op.gt]: this.client.config.discordBot.minimumKillsBeforeStatsCalc
+                }
+            }
+        });
+
+        let topADRPlayer = await this.client.Player.findAll({
+            attributes: ['name', [this.client.sequelize.literal("round(`damage` / (`rounds_ct` + `rounds_tr`))"), "adr"]],
+            limit: 3,
+            order: [
+                [this.client.sequelize.literal('adr'), 'DESC']
             ],
             where: {
                 kills: {
@@ -53,6 +63,7 @@ class Stats extends Commando.Command {
         });
 
         let topTKPlayer = await this.client.Player.findAll({
+            attributes: ['name', 'tk'],
             limit: 3,
             order: [
                 ['tk', 'DESC']
@@ -65,14 +76,10 @@ class Stats extends Commando.Command {
         });
 
         let mostAccuratePlayer = await this.client.Player.findAll({
-            attributes: {
-                include: [
-                    [this.client.sequelize.literal("`hits` / (`shots` + 1)"), 'accuracy']
-                ]
-            },
+            attributes: ['name', [this.client.sequelize.literal("concat(round((`hits` / `shots`) * 100),'%')"), 'accuracy']],
             limit: 3,
             order: [
-                [this.client.sequelize.literal("`hits` / (`shots` + 1)"), 'DESC']
+                [this.client.sequelize.literal('accuracy'), 'DESC']
             ],
             where: {
                 kills: {
@@ -82,14 +89,10 @@ class Stats extends Commando.Command {
         });
 
         let mostHeadshotPercentagePlayer = await this.client.Player.findAll({
-            attributes: {
-                include: [
-                    [this.client.sequelize.literal("`headshots` / (`kills` + 1)"), 'headshotPercent']
-                ]
-            },
+            attributes: ['name', [this.client.sequelize.literal("concat(round((`headshots` / `kills`) * 100),'%')"), 'hs_percent']],
             limit: 3,
             order: [
-                [this.client.sequelize.literal("`headshots` / (`kills` + 1)"), 'DESC']
+                [this.client.sequelize.literal('hs_percent'), 'DESC']
             ],
             where: {
                 kills: {
@@ -99,14 +102,10 @@ class Stats extends Commando.Command {
         });
 
         let leastHitsPerKill = await this.client.Player.findAll({
-            attributes: {
-                include: [
-                    [this.client.sequelize.literal("`hits` / (`kills` + 1)"), 'efficiency']
-                ]
-            },
+            attributes: ['name', [this.client.sequelize.literal("concat(round(`hits` / `kills`, 2), ' hits per kill')"), 'efficiency']],
             limit: 3,
             order: [
-                [this.client.sequelize.literal("`hits` / (`kills` + 1)")]
+                [this.client.sequelize.literal('efficiency'), 'ASC']
             ],
             where: {
                 kills: {
@@ -116,14 +115,11 @@ class Stats extends Commando.Command {
         });
 
         let bestWinRate = await this.client.Player.findAll({
+            attributes: ['name', 'match_win', 'match_draw', 'match_lose', [this.client.sequelize.literal("concat(round( (`match_win` / (`match_win` + `match_draw` + `match_lose`)) * 100), '%')"), 'winLossRatio'],
+                         [this.client.sequelize.literal("(`match_win` / (`match_win` + `match_draw` + `match_lose`))"), 'wlr']],
             limit: 3,
-            attributes: {
-                include: [
-                    [this.client.sequelize.literal("`match_win`/ (`match_win` + `match_draw` + `match_lose`)"), "winLossRatio"]
-                ]
-            },
             order: [
-                [this.client.sequelize.literal("`match_win`/ (`match_win` + `match_draw` + `match_lose`)"), 'DESC']
+                [this.client.sequelize.literal('wlr'), 'DESC']
             ],
             where: {
                 kills: {
@@ -133,6 +129,7 @@ class Stats extends Commando.Command {
         });
 
         let topKnifeKills = await this.client.Player.findAll({
+            attributes: ['name', 'knife'],
             limit: 3,
             order: [
                 ['knife', 'DESC']
@@ -145,6 +142,7 @@ class Stats extends Commando.Command {
         });
 
         let topTaserKills = await this.client.Player.findAll({
+            attributes: ['name', 'taser'],
             limit: 3,
             order: [
                 ['taser', 'DESC']
@@ -157,6 +155,7 @@ class Stats extends Commando.Command {
         });
 
         let topMvp = await this.client.Player.findAll({
+            attributes: ['name', 'mvp'],
             limit: 3,
             order: [
                 ['mvp', 'DESC']
@@ -174,10 +173,11 @@ class Stats extends Commando.Command {
         }
 
         resultEmbed.addField(`:star: Top score`, generateTopThreeString(topScorePlayer, "score", this.client.config), true);
-        resultEmbed.addField(`:star2: Top Kill/death ratio`, generateTopThreeString(topKDAPlayer, "kda", this.client.config), true);
+        resultEmbed.addField(`:star2: Top KDR`, generateTopThreeString(topKDRPlayer, "kdr", this.client.config), true);
+        resultEmbed.addField(`:right_facing_fist: Top ADR`, generateTopThreeString(topADRPlayer, "adr", this.client.config), true);
         resultEmbed.addField(`:poop:  Most teamkills`, generateTopThreeString(topTKPlayer, "tk", this.client.config), true);
         resultEmbed.addField(`:gun:  Most accurate`, generateTopThreeString(mostAccuratePlayer, "accuracy", this.client.config), true);
-        resultEmbed.addField(`:cowboy: Headshot %`, generateTopThreeString(mostHeadshotPercentagePlayer, "headshotPercent", this.client.config), true);
+        resultEmbed.addField(`:cowboy: Headshot`, generateTopThreeString(mostHeadshotPercentagePlayer, "hs_percent", this.client.config), true);
         resultEmbed.addField(`:dart: Most efficient`, generateTopThreeString(leastHitsPerKill, "efficiency", this.client.config), true);
         resultEmbed.addField(`:trophy: Best win/loss ratio`, generateTopThreeString(bestWinRate, "winLossRatio", this.client.config), true);
         resultEmbed.addField(`:dagger: Most knife kills`, generateTopThreeString(topKnifeKills, "knife", this.client.config), true);
@@ -219,28 +219,7 @@ function generateTopThreeString(players, field, config) {
             }
         }
 
-        switch (field) {
-            case "accuracy":
-                let accuracyPercent = (player.dataValues.accuracy * 100).toFixed(2);
-                player.dataValues[field] = accuracyPercent + "%";
-                break;
-            case "headshotPercent":
-                let headshotPercent = (player.dataValues.headshotPercent * 100).toFixed(2);
-                player.dataValues[field] = headshotPercent + "%";
-                break;
-            case "efficiency":
-                let efficiecyPercent = parseFloat(player.dataValues[field]).toFixed(2);
-                player.dataValues[field] = efficiecyPercent + " hits per kill";
-                break;
-            case "winLossRatio":
-                let winLossRatio = (player.dataValues.winLossRatio * 100).toFixed(2)
-                player.dataValues[field] = winLossRatio + "%  " + `${player.dataValues.match_win}W ${player.dataValues.match_lose}L`;
-                break;
-            default:
-                break;
-        }
-
-        returnString += `${prefixText}. ${player.dataValues.name}\n${player.dataValues[field]}\n`;
+        returnString += `${prefixText}. ${player.dataValues.name} - ${player.dataValues[field]}\n`;
         counter++
     }
     return returnString
