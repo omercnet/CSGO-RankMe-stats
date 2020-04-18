@@ -44,7 +44,7 @@ $(document).ready(async () => {
         
         const oldADR = playerData[0].adr;
         const newADR = playerData[playerData.length - 1].adr
-        const adrDifference = newScore - oldScore
+        const adrDifference = newADR - oldADR
         
         richData.push({
             steamId,
@@ -100,7 +100,7 @@ $(document).ready(async () => {
         });
         topADRNames.push(runnerUpPlayer.name)
         topADRData.push(groupedData[runnerUpPlayer.steam].map(d => d.adr));
-        $("#adr-inc ol").append(`<li><a href="/player/${runnerUpPlayer.id}"><span class="tab">${runnerUpPlayer.name}</span></a> +${sortedByKills[index].killsDifference} </li>`);
+        $("#adr-inc ol").append(`<li><a href="/player/${runnerUpPlayer.id}"><span class="tab">${runnerUpPlayer.name}</span></a> +${sortedByADR[index].adrDifference} </li>`);
     }
 
     drawLineChart(topScoreNames, topScoreData, groupedData[sortedByScore[0].steamId].map(d => d.createdAt), 'score-increase-chart')
