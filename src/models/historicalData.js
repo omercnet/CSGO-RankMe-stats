@@ -322,27 +322,27 @@ module.exports = function (sequelize, DataTypes) {
         },
         adr: {
             type: DataTypes.VIRTUAL(DataTypes.SMALLINT, ['damage', 'rounds_ct', 'rounds_tr']),
-            get() { return (this.get('damage') / (this.get('rounds_tr') + this.get('rounds_ct'))).toFixed(0) }
+            get() { return this.get('rounds_tr') ? (this.get('damage') / (this.get('rounds_tr') + this.get('rounds_ct'))).toFixed(0) : 0 }
         },
         kdr: {
             type: DataTypes.VIRTUAL(DataTypes.DECIMAL, ['kills', 'deaths']),
-            get() { return (this.get('kills') / (this.get('deaths') + 1)).toFixed(2) }
+            get() { return this.get('deaths') ? (this.get('kills') / (this.get('deaths'))).toFixed(2) : 0 }
         },
         hs_percent: {
             type: DataTypes.VIRTUAL(DataTypes.STRING, ['kills', 'headshots']),
-            get() { return (this.get('headshots') / (this.get('kills') + 1) * 100).toFixed(0) + '%' }
+            get() { return (this.get('kills') ? (this.get('headshots') / (this.get('kills')) * 100).toFixed(0) : 0)  + '%' }
         },
         accuracy: {
             type: DataTypes.VIRTUAL(DataTypes.STRING, ['hits', 'shots']),
-            get() { return (this.get('hits') / (this.get('shots') + 1) * 100).toFixed(0) + '%' }
+            get() { return (this.get('shots') ? (this.get('hits') / (this.get('shots')) * 100).toFixed(0) : 0)  + '%' }
         },
         efficiency: {
             type: DataTypes.VIRTUAL(DataTypes.STRING, ['hits', 'kills']),
-            get() { return (this.get('hits') / (this.get('kills') + 1)) }  
+            get() { return this.get('kills') ? (this.get('hits') / (this.get('kills'))) : 0 }
         },
         win_loss_ratio: {
             type: DataTypes.VIRTUAL(DataTypes.STRING, ['match_win', 'match_draw', 'match_lose']),
-            get() { return (this.get('match_win') / (this.get('match_win') + this.get('match_draw') + this.get('match_lose'))) }
+            get() { return (this.get('match_win') + this.get('match_draw') + this.get('match_lose')) ? (this.get('match_win') / (this.get('match_win') + this.get('match_draw') + this.get('match_lose'))) : 0 }
         }
     }, {
         tableName: config.historicalData.tableName,

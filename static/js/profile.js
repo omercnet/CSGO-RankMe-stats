@@ -158,8 +158,8 @@ $(document).ready(async () => {
     $("#shots").text(response.shots);
     $("#hits").text(response.hits);
     $("#damage").text(response.damage)
-    $("#hits-per-kill").text((response.hits / response.kills).toFixed(2));
-    $("#damage-per-hit").text((response.damage / response.hits).toFixed(2));
+    $("#hits-per-kill").text(response.kills ? (response.hits / response.kills).toFixed(2) : 0);
+    $("#damage-per-hit").text(response.hits ? (response.damage / response.hits).toFixed(2) : 0);
 
     let lastConnectedDate = new Date(response.lastconnect * 1000);
     $("#last-connected").text(`${lastConnectedDate.toLocaleDateString()} ${lastConnectedDate.toLocaleTimeString()}`)
